@@ -49,24 +49,28 @@ with st.sidebar:
     
     st.info("Built with YOLOv8 & Streamlit")
 
-# Main Header
-st.title("🚦 Traffic Sign Detection Pro")
-st.markdown("##### Real-time computer vision for intelligent road safety.")
-
 @st.cache_resource
 def _cached_model(path: str):
     return load_model(path)
 
-# Initialize Model
-try:
-    model = _cached_model(model_path)
-except Exception as e:
-    st.warning(f"⚠️ Model not found at `{model_path}`. Falling back to base YOLOv8n.")
-    try:
-        model = _cached_model("yolov8n.pt")
-    except Exception:
-        st.error("Critical Error: Base model could not be loaded.")
-        st.stop()
+# Lazy Model Loader
+def get_model():
+    if 'model' not in st.session_state:
+        try:
+            with st.spinner("Initializing AI Engine..."):
+                st.session_state.model = _cached_model(model_path)
+        except Exception as e:
+            st.warning(f"⚠️ Model not found at `{model_path}`. Falling back to base YOLOv8n.")
+            try:
+                st.session_state.model = _cached_model("yolov8n.pt")
+            except Exception:
+                st.error("Critical Error: AI Engine could not be initialized.")
+                st.stop()
+    return st.session_state.model
+
+# Main Header
+st.title("🚦 Traffic Sign Detection Pro")
+st.markdown("##### Real-time computer vision for intelligent road safety.")
 
 # Tabs for Input
 tab1, tab2, tab3 = st.tabs(["🖼️ Image Inference", "🎥 Video Analysis", "📹 Live Webcam"])
@@ -79,6 +83,7 @@ with tab1:
         img = Image.open(file).convert("RGB")
         
         with st.status("Analyzing image...", expanded=True) as status:
+            model = get_model()
             result_img, detections = predict_image(model, img, conf=conf, iou=iou)
             status.update(label="Analysis Complete!", state="complete", expanded=False)
 
@@ -122,6 +127,7 @@ with tab2:
         if st.button("🚀 Process Video"):
             with st.spinner("Processing frames... This may take a minute."):
                 try:
+                    model = get_model()
                     summary = predict_video(model, input_path, output_path, conf=conf, iou=iou)
                     st.video(output_path)
                     
@@ -173,6 +179,7 @@ with tab3:
                     break
                 
                 # Run inference
+                model = get_model()
                 result = model.predict(source=frame, conf=conf, iou=iou, verbose=False)[0]
                 plotted = result.plot()
                 plotted = cv2.cvtColor(plotted, cv2.COLOR_BGR2RGB)
