@@ -32,7 +32,7 @@ with st.sidebar:
     st.image("https://img.icons8.com/fluency/96/traffic-light.png", width=80)
     st.header("Settings")
     
-    model_path = st.text_input("Model Weights", value="runs/detect/synthetic_fine_tune2/weights/best.pt")
+    model_path = st.text_input("Model Weights", value="models/traffic_sign_best.pt")
     
     st.divider()
     st.subheader("Detection Parameters")
