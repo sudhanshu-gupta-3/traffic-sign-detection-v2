@@ -2,6 +2,10 @@
 
 A practical traffic-sign detection project with modern UI, training scripts, data augmentation, and deployment-ready setup.
 
+## 🏠 Access Locally
+Your system is currently configured for local use. 
+**Link:** [http://localhost:8501](http://localhost:8501)
+
 ## New capabilities
 - ✅ **Live webcam detection** mode in UI.
 - ✅ **Expanded class template** in dataset config.
